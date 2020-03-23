@@ -45,14 +45,14 @@ export default class MoviesDAO {
    */
   static async getMoviesByCountry(countries) {
     /**
-    Ticket: Projection
+     Ticket: Projection
 
-    Write a query that matches movies with the countries in the "countries"
-    list, but only returns the title and _id of each movie.
+     Write a query that matches movies with the countries in the "countries"
+     list, but only returns the title and _id of each movie.
 
-    Remember that in MongoDB, the $in operator can be used with a list to
-    match one or more values of a specific field.
-    */
+     Remember that in MongoDB, the $in operator can be used with a list to
+     match one or more values of a specific field.
+     */
 
     let cursor
     try {
@@ -63,10 +63,10 @@ export default class MoviesDAO {
       // wire.
       //-------------------
       const searchCountries = Array.isArray(countries) ? countries : countries.split(", ")
-      const query = {$in: searchCountries}
-      const result = await movies.find({countries: query}, { projection: { title: 1 } }).toArray()
+      const query = { countries: { $in: searchCountries } }
+      const project = { projection: { title: 1 } }
+      return await movies.find(query, project).toArray()
 
-      return result
       //-------------------
       cursor = await movies.find().limit(1)
     } catch (e) {
@@ -113,17 +113,17 @@ export default class MoviesDAO {
    */
   static genreSearchQuery(genre) {
     /**
-    Ticket: Text and Subfield Search
+     Ticket: Text and Subfield Search
 
-    Given an array of one or more genres, construct a query that searches
-    MongoDB for movies with that genre.
-    */
+     Given an array of one or more genres, construct a query that searches
+     MongoDB for movies with that genre.
+     */
 
     const searchGenre = Array.isArray(genre) ? genre : genre.split(", ")
 
     // TODO Ticket: Text and Subfield Search
     // Construct a query that will search for the chosen genre.
-    const query = {genres: {$in: searchGenre}}
+    const query = { genres: { $in: searchGenre } }
     const project = {}
     const sort = DEFAULT_SORT
 
@@ -139,10 +139,10 @@ export default class MoviesDAO {
    * @returns {FacetedSearchReturn} FacetedSearchReturn
    */
   static async facetedSearch({
-    filters = null,
-    page = 0,
-    moviesPerPage = 20,
-  } = {}) {
+                               filters = null,
+                               page = 0,
+                               moviesPerPage = 20,
+                             } = {}) {
     if (!filters || !filters.cast) {
       throw new Error("Must specify cast members to filter by.")
     }
@@ -188,15 +188,15 @@ export default class MoviesDAO {
     }
 
     /**
-    Ticket: Faceted Search
+     Ticket: Faceted Search
 
-    Please append the skipStage, limitStage, and facetStage to the queryPipeline
-    (in that order). You can accomplish this by adding the stages directly to
-    the queryPipeline.
+     Please append the skipStage, limitStage, and facetStage to the queryPipeline
+     (in that order). You can accomplish this by adding the stages directly to
+     the queryPipeline.
 
-    The queryPipeline is a Javascript array, so you can use push() or concat()
-    to complete this task, but you might have to do something about `const`.
-    */
+     The queryPipeline is a Javascript array, so you can use push() or concat()
+     to complete this task, but you might have to do something about `const`.
+     */
 
     const queryPipeline = [
       matchStage,
@@ -227,11 +227,11 @@ export default class MoviesDAO {
    * that would match this query
    */
   static async getMovies({
-    // here's where the default parameters are set for the getMovies method
-    filters = null,
-    page = 0,
-    moviesPerPage = 20,
-  } = {}) {
+                           // here's where the default parameters are set for the getMovies method
+                           filters = null,
+                           page = 0,
+                           moviesPerPage = 20,
+                         } = {}) {
     let queryParams = {}
     if (filters) {
       if ("text" in filters) {
@@ -256,17 +256,17 @@ export default class MoviesDAO {
     }
 
     /**
-    Ticket: Paging
+     Ticket: Paging
 
-    Before this method returns back to the API, use the "moviesPerPage" and
-    "page" arguments to decide the movies to display.
+     Before this method returns back to the API, use the "moviesPerPage" and
+     "page" arguments to decide the movies to display.
 
-    Paging can be implemented by using the skip() and limit() cursor methods.
-    */
+     Paging can be implemented by using the skip() and limit() cursor methods.
+     */
 
-    // TODO Ticket: Paging
-    // Use the cursor to only return the movies that belong on the current page
-    const displayCursor = cursor.limit(moviesPerPage)
+      // TODO Ticket: Paging
+      // Use the cursor to only return the movies that belong on the current page
+    const displayCursor = cursor.limit(moviesPerPage).skip(moviesPerPage*page)
 
     try {
       const moviesList = await displayCursor.toArray()
@@ -289,32 +289,32 @@ export default class MoviesDAO {
   static async getMovieByID(id) {
     try {
       /**
-      Ticket: Get Comments
+       Ticket: Get Comments
 
-      Given a movie ID, build an Aggregation Pipeline to retrieve the comments
-      matching that movie's ID.
+       Given a movie ID, build an Aggregation Pipeline to retrieve the comments
+       matching that movie's ID.
 
-      The $match stage is already completed. You will need to add a $lookup
-      stage that searches the `comments` collection for the correct comments.
-      */
+       The $match stage is already completed. You will need to add a $lookup
+       stage that searches the `comments` collection for the correct comments.
+       */
 
-      // TODO Ticket: Get Comments
-      // Implement the required pipeline.
+        // TODO Ticket: Get Comments
+        // Implement the required pipeline.
       const pipeline = [
-        {
-          $match: {
-            _id: ObjectId(id)
-          }
-        }
-      ]
+          {
+            $match: {
+              _id: ObjectId(id),
+            },
+          },
+        ]
       return await movies.aggregate(pipeline).next()
     } catch (e) {
       /**
-      Ticket: Error Handling
+       Ticket: Error Handling
 
-      Handle the error that occurs when an invalid ID is passed to this method.
-      When this specific error is thrown, the method should return `null`.
-      */
+       Handle the error that occurs when an invalid ID is passed to this method.
+       When this specific error is thrown, the method should return `null`.
+       */
 
       // TODO Ticket: Error Handling
       // Catch the InvalidId error by string matching, and then handle it.
