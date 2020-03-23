@@ -61,6 +61,13 @@ export default class MoviesDAO {
       // and _id. Do not put a limit in your own implementation, the limit
       // here is only included to avoid sending 46000 documents down the
       // wire.
+      //-------------------
+      const searchCountries = Array.isArray(countries) ? countries : countries.split(", ")
+      const query = {$in: searchCountries}
+      const result = await movies.find({countries: query}, { projection: { title: 1 } }).toArray()
+
+      return result
+      //-------------------
       cursor = await movies.find().limit(1)
     } catch (e) {
       console.error(`Unable to issue find command, ${e}`)
