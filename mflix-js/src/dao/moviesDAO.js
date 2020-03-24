@@ -1,5 +1,4 @@
 import { ObjectId } from "bson"
-import commentsDAO from "./commentsDAO"
 
 let movies
 let mflix
